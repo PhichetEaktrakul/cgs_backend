@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: encode # Sets the name of the Spring Boot application to "demo"
+
+  datasource:
+    url: jdbc:sqlserver://MIS007\\SQLEXPRESS:1433;databaseName=consignment_gold;encrypt=false # Database Connection URL
+    username: sa # Database username
+    password: Temp1525!!! # Database password
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver # SQL Server JDBC driver class
+
+  jpa:
+    hibernate:
+      ddl-auto: update # Auto schema update
+    show-sql: true # Show SQL statements in logs
+    database-platform: org.hibernate.dialect.SQLServerDialect # SQL Server dialect
+
+myapp:
+  api:
+    url: "http://localhost:5173"
+
+server:
+  error:
+    include-message: always # Include exception messages in error responses
+  port: 8080 # Server Port

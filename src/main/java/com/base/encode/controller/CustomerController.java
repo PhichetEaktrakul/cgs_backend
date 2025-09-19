@@ -1,6 +1,8 @@
 package com.base.encode.controller;
 
-import com.base.encode.model.CustomerDTO;
+import com.base.encode.model.DTO.Customer;
+import com.base.encode.model.DTO.CustomerMetaEdit;
+
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
@@ -84,7 +86,7 @@ public class CustomerController {
 
     // Add customer after customer accept TOS
     @PostMapping("/tos/add")
-    public ResponseEntity<?> addNewCustomer(@RequestBody CustomerDTO custform) {
+    public ResponseEntity<?> addNewCustomer(@RequestBody Customer custform) {
         String sql = "INSERT INTO Customers (customer_id, first_name, last_name, phone_number, id_card_number, address) VALUES (?, ?, ?, ?, ?, ?)";
 
         int result = jdbcTemplate.update(
@@ -112,6 +114,31 @@ public class CustomerController {
         } catch (EmptyResultDataAccessException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("message", "Customer not found"));
+        }
+    }
+
+    @GetMapping({ "/admin", "/admin/{id}" })
+    public ResponseEntity<?> getCustomers(@PathVariable(required = false) Integer id) {
+        if (id == null) {
+            String sql = "SELECT * FROM Customers";
+            return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
+        } else {
+            String sql = "SELECT * FROM Customers WHERE customer_id = ?";
+            return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
+        }
+    }
+
+    @PutMapping("/meta")
+    public ResponseEntity<?> updateRates(@RequestBody CustomerMetaEdit request) {
+        String sql = "UPDATE Customers SET loan_percent = ?, interest_rate = ? WHERE customer_id = ?";
+        int rows = jdbcTemplate.update(sql, request.getLoanPercent(), request.getInterestRate(),
+                request.getCustomerId());
+
+        if (rows > 0) {
+            return ResponseEntity.ok().body("Rates updated successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Customer not found or update failed.");
         }
     }
 

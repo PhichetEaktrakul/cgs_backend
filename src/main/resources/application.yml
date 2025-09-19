@@ -1,6 +1,9 @@
 spring:
   application:
-    name: encode # Sets the name of the Spring Boot application to "demo"
+    name: encode # Sets the name of the Spring Boot application to "encode"
+  devtools:
+    restart:
+      enabled: true # Enable devtools auto reload
 
   datasource:
     url: jdbc:sqlserver://MIS007\\SQLEXPRESS:1433;databaseName=consignment_gold;encrypt=false # Database Connection URL

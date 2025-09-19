@@ -1,7 +1,4 @@
-package com.base.encode.model;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+package com.base.encode.model.DTO;
 
 import lombok.*;
 
@@ -10,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerDTO {
+public class TokenRequest {
     private Integer custId;
 
     private String firstname;
@@ -22,12 +19,6 @@ public class CustomerDTO {
     private String idcard;
 
     private String address;
-
-    private BigDecimal goldBalance96;
-
-    private BigDecimal goldBalance99;
-
-    private LocalDateTime registerAt;
 
     private String source;
 }

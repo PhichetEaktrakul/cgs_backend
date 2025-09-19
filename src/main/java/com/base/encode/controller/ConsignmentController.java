@@ -1,6 +1,5 @@
 package com.base.encode.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,12 +8,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.base.encode.model.ConsignmentRequest;
+import com.base.encode.model.DTO.ConsignmentRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,10 +21,11 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("consignment")
 @RequiredArgsConstructor
 public class ConsignmentController {
+
     private final JdbcTemplate jdbcTemplate;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createNewConsignment(@RequestBody ConsignmentRequest request) {
+    public ResponseEntity<?> newConsignmentTransaction(@RequestBody ConsignmentRequest request) {
         String sql = "{call New_Consignment_Transaction(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
 
         try {
@@ -42,56 +42,43 @@ public class ConsignmentController {
                     request.getEndDate(),
                     request.getTransactionType());
 
-            return ResponseEntity.ok("Create new Consignment successfully!");
+            return ResponseEntity.ok("New consignment transaction created successfully!");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Insert failed");
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
-    /*
-     * @PostMapping("create")
-     * public ResponseEntity<?> createConsignment(@RequestBody AddConsignmentDTO
-     * addconsignmentform) {
-     * String sql =
-     * "INSERT INTO Pledged_Gold (pledge_id, customer_id, weight_gram, gold_type, ref_price, loan_percent, loan_amount, interest_rate, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-     * ;
-     * 
-     * int result = jdbcTemplate.update(
-     * sql,
-     * addconsignmentform.getPledgeId(),
-     * addconsignmentform.getCustomerId(),
-     * addconsignmentform.getWeight(),
-     * addconsignmentform.getGoldType(),
-     * addconsignmentform.getRefPrice(),
-     * addconsignmentform.getLoanPercent(),
-     * addconsignmentform.getLoanAmount(),
-     * addconsignmentform.getInterestRate(),
-     * addconsignmentform.getStartDate(),
-     * addconsignmentform.getEndDate());
-     * 
-     * return result > 0
-     * ? ResponseEntity.ok("Create new Consignment successfully")
-     * : ResponseEntity.status(500).body("Insert failed");
-     * }
-     */
-
-    @GetMapping("status/{id}")
-    public ResponseEntity<?> getConsignmentHistoryById(@PathVariable int id) {
+    @GetMapping("/history/{id}")
+    public ResponseEntity<?> getConsignmentHistoryByID(@PathVariable int id) {
         String sql = "SELECT * FROM View_Consignment_History WHERE customer_id = ? ORDER BY transaction_date DESC";
 
         return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
     }
 
-    @GetMapping("status/all")
+    @GetMapping("/history/all")
     public ResponseEntity<?> getConsignmentHistoryAll() {
         String sql = "SELECT * FROM View_Consignment_History ORDER BY transaction_date DESC";
 
         return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
     }
 
-    @PostMapping("/update/status")
-    public ResponseEntity<Map<String, Object>> approveConsignment(@RequestBody Map<String, Object> request) {
-        Map<String, Object> response = new HashMap<>();
+    @GetMapping("/monitor/{id}")
+    public ResponseEntity<?> getMonitoringTicketsByID(@PathVariable int id) {
+        String sql = "SELECT * FROM View_Consignment_Ticket WHERE status = 'active' AND end_date >= CAST(GETDATE() AS DATE) AND customer_id = ? ORDER BY transaction_date DESC";
+
+        return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
+    }
+
+    @GetMapping("/monitor/all")
+    public ResponseEntity<?> getMonitoringTicketsAll() {
+        String sql = "SELECT * FROM View_Consignment_Ticket WHERE status = 'active' AND end_date >= CAST(GETDATE() AS DATE) ORDER BY transaction_date DESC";
+
+        return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
+    }
+
+    @PostMapping("/approve/status")
+    public ResponseEntity<?> approveConsignmentTransaction(@RequestBody Map<String, Object> request) {
+        String sql = "EXEC Approve_Consignment_Transaction ?, ?, ?, ?, ?, ?, ?";
 
         try {
             Integer transactionId = (Integer) request.get("transactionId");
@@ -99,90 +86,44 @@ public class ConsignmentController {
             Integer customerId = (Integer) request.get("customerId");
             Integer goldType = (Integer) request.get("goldType");
             Double weight = ((Number) request.get("weight")).doubleValue();
+            Double loanAmount = ((Number) request.get("loanAmount")).doubleValue();
             String method = (String) request.get("method");
 
-            String sql = "EXEC Approve_Consignment_Transaction ?, ?, ?, ?, ?, ?";
-            jdbcTemplate.update(sql, transactionId, pledgeId, customerId, goldType, weight, method);
+            jdbcTemplate.update(sql, transactionId, pledgeId, customerId, goldType, weight, loanAmount, method);
 
-            response.put("status", "success");
-            response.put("message", "Consignment transaction processed successfully");
-            return ResponseEntity.ok(response);
-
+            return ResponseEntity.ok("Update successfully");
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
 
     }
 
-    /*
-     * @PostMapping("/update-status")
-     * public ResponseEntity<String> updateStatus(
-     * 
-     * @RequestParam("pledgeId") int pledgeId,
-     * 
-     * @RequestParam("status") String status) {
-     * 
-     * // Only allow 'active' or 'reject'
-     * if (!status.equalsIgnoreCase("active") && !status.equalsIgnoreCase("reject"))
-     * {
-     * return ResponseEntity.badRequest().
-     * body("Invalid status. Only 'active' or 'reject' allowed.");
-     * }
-     * 
-     * String sql = "UPDATE Pledged_Gold SET status = ? WHERE pledge_id = ?";
-     * int rowsAffected = jdbcTemplate.update(sql, status.toLowerCase(), pledgeId);
-     * 
-     * if (rowsAffected > 0) {
-     * return ResponseEntity.ok("Status updated to " + status + " for pledge ID " +
-     * pledgeId);
-     * } else {
-     * return ResponseEntity.badRequest().body("No record found for pledge ID: " +
-     * pledgeId);
-     * }
-     * }
-     */
+    /* TEMP Controller */
+    @PostMapping("/order-switch")
+    public ResponseEntity<?> switchOrderStatus(@RequestBody Map<String, Object> payload) {
+        String sql = "UPDATE Pledged_Gold SET pledge_order = ? WHERE pledge_id = ?";
 
-    /*
-     * @PostMapping("/transaction")
-     * public String createTransaction(@RequestBody AddTransactionConsignDTO
-     * transaction) {
-     * try {
-     * 
-     * PledgeGoldDTO pledgeGoldDTO = transaction.getData(); // <-- here
-     * String sql2 = "INSERT INTO Pledged_Gold " +
-     * "(pledge_id, customer_id, weight, gold_type, ref_price, loan_percent, loan_amount, interest_rate, start_date, end_date) "
-     * +
-     * "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-     * 
-     * jdbcTemplate.update(
-     * sql2,
-     * pledgeGoldDTO.getPledgeId(),
-     * pledgeGoldDTO.getCustomerId(),
-     * pledgeGoldDTO.getWeight(),
-     * pledgeGoldDTO.getGoldType(),
-     * pledgeGoldDTO.getRefPrice(),
-     * pledgeGoldDTO.getLoanPercent(),
-     * pledgeGoldDTO.getLoanAmount(),
-     * pledgeGoldDTO.getInterestRate(),
-     * pledgeGoldDTO.getStartDate(),
-     * pledgeGoldDTO.getEndDate());
-     * 
-     * // Insert into Transaction_Logs
-     * String sql1 =
-     * "INSERT INTO Transaction_Logs (pledge_id, transaction_type, amount) VALUES (?, ?, ?)"
-     * ;
-     * jdbcTemplate.update(sql1,
-     * transaction.getPledge_id(),
-     * transaction.getTransaction_type(),
-     * transaction.getAmount());
-     * 
-     * return "Transaction saved successfully!";
-     * } catch (Exception e) {
-     * e.printStackTrace();
-     * return "Error: " + e.getMessage();
-     * }
-     * }
-     */
+        List<Integer> pledgeIds = (List<Integer>) payload.get("pledgeIds");
+        String status = (String) payload.get("status");
+
+        for (Integer id : pledgeIds) {
+            jdbcTemplate.update(sql, status, id);
+        }
+
+        return ResponseEntity.ok("Status updated");
+    }
+
+    @PutMapping("/open-market")
+    public ResponseEntity<?> toggleMarket() {
+        String sqlUpdate = "UPDATE Open_Market " +
+                "SET market = CASE WHEN market = 1 THEN 0 ELSE 1 END " +
+                "WHERE id = 1";
+        int updated = jdbcTemplate.update(sqlUpdate);
+
+        if (updated == 0) {
+            return ResponseEntity.status(404).body("Open_Market not found with id = 1");
+        }
+        return ResponseEntity.ok("Success! Open_Market toggled.");
+    }
+
 }

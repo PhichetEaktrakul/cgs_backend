@@ -1,4 +1,5 @@
-package com.base.encode.model;
+package com.base.encode.model.DTO;
+
 import lombok.*;
 
 @Getter
@@ -6,9 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RegisterRequest {
-
+public class LoginRequest {
     private String username;
+
     private String password;
-    private String role; // e.g., "USER" or "ADMIN"
 }

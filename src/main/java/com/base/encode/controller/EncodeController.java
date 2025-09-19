@@ -1,7 +1,5 @@
 package com.base.encode.controller;
 
-import com.base.encode.model.EncodeDTO;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -21,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.base.encode.model.DTO.TokenRequest;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("json")
+@RequestMapping("token")
 @RequiredArgsConstructor
 public class EncodeController {
 
@@ -32,14 +32,14 @@ public class EncodeController {
     private String apiURL;
 
     @PostMapping("/encode")
-    public ResponseEntity<?> encodeToken(@RequestBody EncodeDTO encodeDTO) throws Exception {
-        int custid = encodeDTO.getCustId();
-        String firstname = encodeDTO.getFirstname();
-        String lastname = encodeDTO.getLastname();
-        String phone = encodeDTO.getPhonenumber();
-        String idcard = encodeDTO.getIdcard();
-        String address = encodeDTO.getAddress();
-        String source = encodeDTO.getSource();
+    public ResponseEntity<?> encodeToken(@RequestBody TokenRequest token) throws Exception {
+        int custid = token.getCustId();
+        String firstname = token.getFirstname();
+        String lastname = token.getLastname();
+        String phone = token.getPhonenumber();
+        String idcard = token.getIdcard();
+        String address = token.getAddress();
+        String source = token.getSource();
 
         String rawToken = "custid=" + custid + "&firstname=" + firstname + "&lastname=" + lastname + "&phone="
                 + phone + "&idcard=" + idcard + "&address=" + address + "&source=" + source;

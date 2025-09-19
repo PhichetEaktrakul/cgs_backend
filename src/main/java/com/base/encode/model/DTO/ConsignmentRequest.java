@@ -1,4 +1,4 @@
-package com.base.encode.model;
+package com.base.encode.model.DTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AddConsignmentDTO {
+public class ConsignmentRequest {
     private Integer pledgeId;
 
     private Integer customerId;
@@ -30,4 +30,6 @@ public class AddConsignmentDTO {
     private LocalDateTime startDate;
 
     private LocalDateTime endDate;
+
+    private String transactionType;
 }

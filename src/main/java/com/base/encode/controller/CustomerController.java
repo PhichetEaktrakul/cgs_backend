@@ -21,9 +21,9 @@ public class CustomerController {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // Get data of customer-outer By Id
+    // ================= Get data of customer-outer By ID =================
     @GetMapping("/outer/{id}")
-    public ResponseEntity<?> getCustomerOuterById(@PathVariable int id) {
+    public ResponseEntity<?> getCustomerOuterByID(@PathVariable int id) {
         String sql = "SELECT * FROM Customers_Outer WHERE customer_id = ?";
 
         try {
@@ -35,9 +35,9 @@ public class CustomerController {
         }
     }
 
-    // Get gold data of customer-outer By Id
+    // ================= Get gold data of customer-outer By ID =================
     @GetMapping("/outer/{id}/gold")
-    public ResponseEntity<?> getCustomerOuterGoldById(@PathVariable int id) {
+    public ResponseEntity<?> getCustomerOuterGoldByID(@PathVariable int id) {
         String sql = "SELECT balance96, balance99 FROM Customers_Outer WHERE customer_id = ?";
 
         try {
@@ -49,9 +49,9 @@ public class CustomerController {
         }
     }
 
-    // Add or Subtract customer-outer gold balance
+    // ================= Add or Subtract customer-outer gold balance =================
     @PostMapping("/outer/goldupdate")
-    public ResponseEntity<?> updateBalance(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> updateCustomerOuterBalance(@RequestBody Map<String, Object> request) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -74,9 +74,9 @@ public class CustomerController {
         }
     }
 
-    // Check if customer already accept TOS
+    // ================= Check if customer already accept TOS =================
     @GetMapping("/tos/{id}")
-    public ResponseEntity<Boolean> checkIfCustomerExistsById(@PathVariable int id) {
+    public ResponseEntity<Boolean> checkCustomerTOS(@PathVariable int id) {
         String sql = "SELECT COUNT(*) FROM Customers WHERE customer_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
 
@@ -84,9 +84,9 @@ public class CustomerController {
         return ResponseEntity.ok(exists);
     }
 
-    // Add customer after customer accept TOS
+    // ================= Add customer after customer accept TOS =================
     @PostMapping("/tos/add")
-    public ResponseEntity<?> addNewCustomer(@RequestBody Customer custform) {
+    public ResponseEntity<?> addCustomerTOS(@RequestBody Customer custform) {
         String sql = "INSERT INTO Customers (customer_id, first_name, last_name, phone_number, id_card_number, address) VALUES (?, ?, ?, ?, ?, ?)";
 
         int result = jdbcTemplate.update(
@@ -103,9 +103,9 @@ public class CustomerController {
                 : ResponseEntity.status(500).body("Insert failed");
     }
 
-    // Get meta data[loan% and Int rate] of Customer
+    // ================= Get meta data[loan% and Int rate] of Customer =================
     @GetMapping("/meta/{id}")
-    public ResponseEntity<?> getCustomerMetaById(@PathVariable int id) {
+    public ResponseEntity<?> getCustomerMetaByID(@PathVariable int id) {
         String sql = "SELECT loan_percent, interest_rate FROM Customers WHERE customer_id = ?";
 
         try {
@@ -117,19 +117,9 @@ public class CustomerController {
         }
     }
 
-    @GetMapping({ "/admin", "/admin/{id}" })
-    public ResponseEntity<?> getCustomers(@PathVariable(required = false) Integer id) {
-        if (id == null) {
-            String sql = "SELECT * FROM Customers";
-            return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
-        } else {
-            String sql = "SELECT * FROM Customers WHERE customer_id = ?";
-            return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
-        }
-    }
-
+    // ================= Update meta data[loan% and Int rate] of Customer =================
     @PutMapping("/meta")
-    public ResponseEntity<?> updateRates(@RequestBody CustomerMetaEdit request) {
+    public ResponseEntity<?> updateCustomerMeta(@RequestBody CustomerMetaEdit request) {
         String sql = "UPDATE Customers SET loan_percent = ?, interest_rate = ? WHERE customer_id = ?";
         int rows = jdbcTemplate.update(sql, request.getLoanPercent(), request.getInterestRate(),
                 request.getCustomerId());
@@ -142,50 +132,16 @@ public class CustomerController {
         }
     }
 
-    /*
-     * @PostMapping("/outer/gold/subtract")
-     * public ResponseEntity<String> subtractBalance(
-     * 
-     * @RequestParam int customer,
-     * 
-     * @RequestParam int type,
-     * 
-     * @RequestParam double weight) {
-     * 
-     * String column;
-     * if (type == 1) {
-     * column = "balance96";
-     * } else if (type == 2) {
-     * column = "balance99";
-     * } else {
-     * return ResponseEntity.badRequest().body("Invalid type (must be 1 or 2).");
-     * }
-     * 
-     * // Check current balance
-     * String sqlSelect = "SELECT " + column +
-     * " FROM Customers_Outer WHERE customer_id = ?";
-     * Double currentBalance = jdbcTemplate.queryForObject(sqlSelect, Double.class,
-     * customer);
-     * 
-     * if (currentBalance == null) {
-     * return ResponseEntity.badRequest().body("Customer not found.");
-     * }
-     * 
-     * if (currentBalance < weight) {
-     * return ResponseEntity.badRequest().body("Insufficient balance.");
-     * }
-     * 
-     * // Update balance
-     * String sqlUpdate = "UPDATE Customers_Outer SET " + column + " = " + column +
-     * " - ? WHERE customer_id = ?";
-     * int rows = jdbcTemplate.update(sqlUpdate, weight, customer);
-     * 
-     * if (rows > 0) {
-     * return ResponseEntity.ok("Balance updated successfully.");
-     * } else {
-     * return ResponseEntity.status(500).body("Failed to update balance.");
-     * }
-     * }
-     */
+    // ================= Get All Customer or Search Customer [Admin Panel] =================
+    @GetMapping({ "/admin", "/admin/{id}" })
+    public ResponseEntity<?> getCustomers(@PathVariable(required = false) Integer id) {
+        if (id == null) {
+            String sql = "SELECT * FROM Customers";
+            return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
+        } else {
+            String sql = "SELECT * FROM Customers WHERE customer_id = ?";
+            return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
+        }
+    }
 
 }

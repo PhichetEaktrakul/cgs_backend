@@ -44,8 +44,8 @@ public class GoldPriceController {
         return ResponseEntity.ok(jdbcTemplate.query(sql, rowMapper));
     }
 
-    @GetMapping("/lastest")
-    public ResponseEntity<GoldPriceLog> getGoldPriceLastest() {
+    @GetMapping("/latest")
+    public ResponseEntity<GoldPriceLog> getGoldPriceLatest() {
         String sql = "SELECT TOP 1 * FROM GoldPrices ORDER BY created_at DESC";
 
         List<GoldPriceLog> list = jdbcTemplate.query(sql, rowMapper);

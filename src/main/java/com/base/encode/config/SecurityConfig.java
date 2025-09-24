@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/consignment/create",
                                 "/consignment/history/**",
                                 "/gold-prices/**",
+                                "/gold-assn/latest",
                                 "/auth/login",
                                 "/auth/register")
                         .permitAll()

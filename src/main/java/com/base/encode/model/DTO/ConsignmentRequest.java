@@ -11,9 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ConsignmentRequest {
-    private Integer pledgeId;
-
-    private Integer customerId;
+    private String customerId;
 
     private BigDecimal weight;
 

@@ -1,7 +1,7 @@
 package com.base.encode.controller;
 
-import com.base.encode.model.DTO.Customer;
-import com.base.encode.model.DTO.CustomerMetaEdit;
+import com.base.encode.model.DTO.CustomerOuter;
+import com.base.encode.model.DTO.InitialConfigRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +23,7 @@ public class CustomerController {
 
     // ================= Get data of customer-outer By ID =================
     @GetMapping("/outer/{id}")
-    public ResponseEntity<?> getCustomerOuterByID(@PathVariable int id) {
+    public ResponseEntity<?> getCustomerOuterByID(@PathVariable String id) {
         String sql = "SELECT * FROM Customers_Outer WHERE customer_id = ?";
 
         try {
@@ -37,7 +37,7 @@ public class CustomerController {
 
     // ================= Get gold data of customer-outer By ID =================
     @GetMapping("/outer/{id}/gold")
-    public ResponseEntity<?> getCustomerOuterGoldByID(@PathVariable int id) {
+    public ResponseEntity<?> getCustomerOuterGoldByID(@PathVariable String id) {
         String sql = "SELECT balance96, balance99 FROM Customers_Outer WHERE customer_id = ?";
 
         try {
@@ -49,13 +49,14 @@ public class CustomerController {
         }
     }
 
-    // ================= Add or Subtract customer-outer gold balance =================
+    // ================= Add or Subtract customer-outer gold balance
+    // =================
     @PostMapping("/outer/goldupdate")
     public ResponseEntity<?> updateCustomerOuterBalance(@RequestBody Map<String, Object> request) {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Integer customerId = (Integer) request.get("customerId");
+            String customerId = (String) request.get("customerId");
             Integer goldType = (Integer) request.get("goldType");
             Double weight = ((Number) request.get("weight")).doubleValue();
             String method = (String) request.get("method");
@@ -74,73 +75,35 @@ public class CustomerController {
         }
     }
 
-    // ================= Check if customer already accept TOS =================
-    @GetMapping("/tos/{id}")
-    public ResponseEntity<Boolean> checkCustomerTOS(@PathVariable int id) {
-        String sql = "SELECT COUNT(*) FROM Customers WHERE customer_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
-
-        boolean exists = count != null && count > 0;
-        return ResponseEntity.ok(exists);
-    }
-
-    // ================= Add customer after customer accept TOS =================
-    @PostMapping("/tos/add")
-    public ResponseEntity<?> addCustomerTOS(@RequestBody Customer custform) {
-        String sql = "INSERT INTO Customers (customer_id, first_name, last_name, phone_number, id_card_number, address) VALUES (?, ?, ?, ?, ?, ?)";
-
-        int result = jdbcTemplate.update(
-                sql,
-                custform.getCustId(),
-                custform.getFirstname(),
-                custform.getLastname(),
-                custform.getPhonenumber(),
-                custform.getIdcard(),
-                custform.getAddress());
-
-        return result > 0
-                ? ResponseEntity.ok("Customer inserted successfully")
-                : ResponseEntity.status(500).body("Insert failed");
-    }
-
-    // ================= Get meta data[loan% and Int rate] of Customer =================
-    @GetMapping("/meta/{id}")
-    public ResponseEntity<?> getCustomerMetaByID(@PathVariable int id) {
-        String sql = "SELECT loan_percent, interest_rate FROM Customers WHERE customer_id = ?";
+    // ================= Get initial data[Loan% and Interest rate and Number of
+    // Installment] of Customer =================
+    @GetMapping("/initial/{id}")
+    public ResponseEntity<?> getCustomerInitialByID(@PathVariable String id) {
+        String sql = "SELECT loan_percent, interest_rate, num_pay FROM Customers WHERE customer_id = ?";
 
         try {
-            Map<String, Object> meta = jdbcTemplate.queryForMap(sql, id);
-            return ResponseEntity.ok(meta);
+            Map<String, Object> Initial = jdbcTemplate.queryForMap(sql, id);
+            return ResponseEntity.ok(Initial);
         } catch (EmptyResultDataAccessException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("message", "Customer not found"));
         }
     }
 
-    // ================= Update meta data[loan% and Int rate] of Customer =================
-    @PutMapping("/meta")
-    public ResponseEntity<?> updateCustomerMeta(@RequestBody CustomerMetaEdit request) {
+    // ================= Update Initial data[Loan% and Interest rate and Number of
+    // Installment] of Customer =================
+    @PutMapping("/initial")
+    public ResponseEntity<?> updateCustomerInitial(@RequestBody InitialConfigRequest request) {
         String sql = "UPDATE Customers SET loan_percent = ?, interest_rate = ? WHERE customer_id = ?";
+
         int rows = jdbcTemplate.update(sql, request.getLoanPercent(), request.getInterestRate(),
                 request.getCustomerId());
 
         if (rows > 0) {
-            return ResponseEntity.ok().body("Rates updated successfully!");
+            return ResponseEntity.ok().body("Initial updated successfully!");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Customer not found or update failed.");
-        }
-    }
-
-    // ================= Get All Customer or Search Customer [Admin Panel] =================
-    @GetMapping({ "/admin", "/admin/{id}" })
-    public ResponseEntity<?> getCustomers(@PathVariable(required = false) Integer id) {
-        if (id == null) {
-            String sql = "SELECT * FROM Customers";
-            return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
-        } else {
-            String sql = "SELECT * FROM Customers WHERE customer_id = ?";
-            return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
         }
     }
 

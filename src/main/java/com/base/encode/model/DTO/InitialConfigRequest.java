@@ -8,10 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerMetaEdit {
-    private Integer customerId;
+public class InitialConfigRequest {
+    private String customerId;
 
     private BigDecimal loanPercent;
 
     private BigDecimal interestRate;
+
+    private Integer numPay;
 }

@@ -33,7 +33,7 @@ public class EncodeController {
 
     @PostMapping("/encode")
     public ResponseEntity<?> encodeToken(@RequestBody TokenRequest token) throws Exception {
-        int custid = token.getCustId();
+        String customerId = token.getCustomerId();
         String firstname = token.getFirstname();
         String lastname = token.getLastname();
         String phone = token.getPhonenumber();
@@ -41,7 +41,7 @@ public class EncodeController {
         String address = token.getAddress();
         String source = token.getSource();
 
-        String rawToken = "custid=" + custid + "&firstname=" + firstname + "&lastname=" + lastname + "&phone="
+        String rawToken = "customerId=" + customerId + "&firstname=" + firstname + "&lastname=" + lastname + "&phone="
                 + phone + "&idcard=" + idcard + "&address=" + address + "&source=" + source;
         String keyString = "5dkoaldjcmsldkwo75dd52s5d6d3v5a7";
 

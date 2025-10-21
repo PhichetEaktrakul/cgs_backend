@@ -21,7 +21,7 @@ public class RedeemController {
     private final JdbcTemplate jdbcTemplate;
 
     @GetMapping("/list/{id}")
-    public ResponseEntity<?> getRedeemableConsignmentByID(@PathVariable int id) {
+    public ResponseEntity<?> getRedeemableConsignmentByID(@PathVariable String id) {
         String sql = "SELECT * FROM View_Redeemable_Consignment WHERE customer_id = ? ORDER BY end_date ASC";
 
         return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
@@ -32,8 +32,8 @@ public class RedeemController {
         String sql = "EXEC New_Redeem_Transaction ?, ?, ?, ?";
 
         try {
-            Integer transactionId = (Integer) request.get("transactionId");
-            Integer pledgeId = (Integer) request.get("pledgeId");
+            String transactionId = (String) request.get("transactionId");
+            String pledgeId = (String) request.get("pledgeId");
             Double principalPay = ((Number) request.get("principalPay")).doubleValue();
             Double interestPay = ((Number) request.get("interestPay")).doubleValue();
 
@@ -46,7 +46,7 @@ public class RedeemController {
     }
 
     @GetMapping("/history/{id}")
-    public ResponseEntity<?> getRedeemHistoryByID(@PathVariable int id) {
+    public ResponseEntity<?> getRedeemHistoryByID(@PathVariable String id) {
         String sql = "SELECT * FROM View_Redeem_History WHERE customer_id = ? ORDER BY transaction_date DESC";
 
         return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
@@ -61,17 +61,19 @@ public class RedeemController {
 
     @PostMapping("/approve/status")
     public ResponseEntity<?> approveRedeemTransaction(@RequestBody Map<String, Object> request) {
-        String sql = "EXEC Approve_Redeem_Transaction ?, ?, ?, ?, ?, ?";
+        String sql = "EXEC Approve_Redeem_Transaction ?, ?, ?, ?, ?, ?, ?, ?";
 
         try {
-            Integer transId = (Integer) request.get("transId");
-            Integer pledgeId = (Integer) request.get("pledgeId");
+            String transId = (String) request.get("transId");
+            String pledgeId = (String) request.get("pledgeId");
             Integer goldType = (Integer) request.get("goldType");
+            Double intPaid = ((Number) request.get("intPaid")).doubleValue();
+            Double prinPaid = ((Number) request.get("prinPaid")).doubleValue();
             Double weight = ((Number) request.get("weight")).doubleValue();
-            Integer custId = (Integer) request.get("custId");
+            String custId = (String) request.get("custId");
             String method = (String) request.get("method");
 
-            jdbcTemplate.update(sql, transId, pledgeId, goldType, weight, custId, method);
+            jdbcTemplate.update(sql, transId, pledgeId, goldType, intPaid, prinPaid, weight, custId, method);
 
             return ResponseEntity.ok("Update successfully");
         } catch (Exception e) {

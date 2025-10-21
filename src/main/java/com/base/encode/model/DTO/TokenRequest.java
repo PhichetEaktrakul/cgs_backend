@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class TokenRequest {
-    private Integer custId;
+    private String customerId;
 
     private String firstname;
 

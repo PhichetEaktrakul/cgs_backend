@@ -21,7 +21,7 @@ public class InterestController {
     private final JdbcTemplate jdbcTemplate;
 
     @GetMapping("/payable/{id}")
-    public ResponseEntity<?> getPayableInterestByID(@PathVariable int id) {
+    public ResponseEntity<?> getPayableInterestByID(@PathVariable String id) {
         String sql = "SELECT * FROM View_Payable_Interest WHERE customer_id = ? AND end_date >= CAST(GETDATE() AS DATE) ORDER BY due_date ASC";
 
         return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
@@ -32,8 +32,8 @@ public class InterestController {
         String sql = "EXEC Pay_Interest_Transaction ?, ?, ?, ?";
 
         try {
-            Integer interestId = (Integer) request.get("interestId");
-            Integer pledgeId = (Integer) request.get("pledgeId");
+            String interestId = (String) request.get("interestId");
+            String pledgeId = (String) request.get("pledgeId");
             Double payInterest = ((Number) request.get("payInterest")).doubleValue();
             Double payLoan = ((Number) request.get("payLoan")).doubleValue();
 
@@ -46,7 +46,7 @@ public class InterestController {
     }
 
     @GetMapping("/history/{id}")
-    public ResponseEntity<?> getInterestHistoryByID(@PathVariable int id) {
+    public ResponseEntity<?> getInterestHistoryByID(@PathVariable String id) {
         String sql = "SELECT * FROM View_Interest_History WHERE customer_id = ? ORDER BY transaction_date DESC";
 
         return ResponseEntity.ok(jdbcTemplate.queryForList(sql, id));
@@ -64,9 +64,9 @@ public class InterestController {
         String sql = "EXEC Approve_Interest_Transaction ?, ?, ?, ?, ?, ?, ?, ?, ?";
 
         try {
-            Integer interestId = (Integer) request.get("interestId");
-            Integer transactionId = (Integer) request.get("transactionId");
-            Integer pledgeId = (Integer) request.get("pledgeId");
+            String interestId = (String) request.get("interestId");
+            String transactionId = (String) request.get("transactionId");
+            String pledgeId = (String) request.get("pledgeId");
             String dueDate = (String) request.get("dueDate"); // Expecting ISO date string from frontend
             String endDate = (String) request.get("endDate"); // Expecting ISO date string from frontend
             Double interestAmount = ((Number) request.get("interestAmount")).doubleValue();

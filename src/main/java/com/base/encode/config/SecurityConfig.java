@@ -59,13 +59,13 @@ public class SecurityConfig {
                                 "/interest/create",
                                 "/interest/history/**",
                                 "/token/**",
+                                "/tos/**",
                                 "/customer/**",
                                 "/consignment/create",
                                 "/consignment/history/**",
                                 "/gold-prices/**",
                                 "/gold-assn/latest",
-                                "/auth/login",
-                                "/auth/register")
+                                "/auth/**")
                         .permitAll()
                         // all other endpoints require authentication
                         .anyRequest().authenticated())
